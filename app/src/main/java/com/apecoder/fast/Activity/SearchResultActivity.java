@@ -64,33 +64,14 @@ public class SearchResultActivity extends AppCompatActivity
             }else{
                 url = "http://"+url;
             }
-
         }
         Log.e("是网址>>>>",url);
-//        mAgentWeb = AgentWeb.with(this)//传入Activity
-//                .setAgentWebParent(activitySearchResult, new LinearLayout.LayoutParams(-1, -1))//传入AgentWeb 的父控件 ，如果父控件为 RelativeLayout ， 那么第二参数需要传入 RelativeLayout.LayoutParams ,第一个参数和第二个参数应该对应。
-//                .useDefaultIndicator()// 使用默认进度条
-////                .setIndicatorColorWithHeight(ContextCompat.getColor(this,R.color.progress_color),3)
-////                .defaultProgressBarColor() // 使用默认进度条颜色
-//                .set(new ChromeClientCallbackManager.ReceivedTitleCallback() {
-//                    @Override
-//                    public void onReceivedTitle(WebView view, String title) {
-//                        toolbar.setTitle(title);
-//                    }
-//                }) //设置 Web 页面的 title 回调
-//                .setWebViewClient(mWebViewClient)
-//                .createAgentWeb()
-//                .ready()
-//                .go(url);
-
         mAgentWeb =  AgentWeb.with(this)
                 .setAgentWebParent(activitySearchResult, new LinearLayout.LayoutParams(-1, -1))
                 .useDefaultIndicator()
                 .createAgentWeb()
                 .ready()
                 .go(url);
-//        mAgentWeb.getAgentWebSettings().getWebSettings().setSupportZoom(true);
-//        addBGChild((FrameLayout) mAgentWeb.getWebCreator().getGroup()); // 得到 AgentWeb 最底层的控件
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

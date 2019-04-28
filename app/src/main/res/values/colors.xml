@@ -7,4 +7,5 @@
     <color name="colorAccent_theme">#4285f4</color>
 
     <color name="progress_color">#00eeff</color>
+    <color name="main_gray">#808080</color>
 </resources>

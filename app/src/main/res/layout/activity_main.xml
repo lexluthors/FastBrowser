@@ -30,15 +30,85 @@
                 android:hint="搜索或输入网址"
                 android:imeOptions="actionGo"
                 android:inputType="text"
-                android:paddingBottom="8dp"
+                android:gravity="center_vertical"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
-                android:paddingTop="8dp"
                 android:singleLine="true"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 />
         </LinearLayout>
 
-
     </android.support.v7.widget.Toolbar>
+    <FrameLayout
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </FrameLayout>
+    <LinearLayout
+        android:id="@+id/layout"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <ImageView
+            android:focusable="true"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="11dp"
+            android:id="@+id/houtui"
+            android:layout_weight="1"
+            android:src="@drawable/ic_arrow_back_black_24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+        <ImageView
+            android:focusable="true"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="11dp"
+            android:id="@+id/qianjin"
+            android:layout_weight="1"
+            android:src="@drawable/ic_arrow_forward_black_24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+        <ImageView
+            android:focusable="true"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:id="@+id/zhuye"
+            android:padding="11dp"
+            android:layout_weight="1"
+            android:src="@drawable/ic_menu_black_24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+        <ImageView
+            android:focusable="true"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:id="@+id/shuaxin"
+            android:padding="11dp"
+            android:layout_weight="1"
+            android:src="@drawable/ic_zhuye"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+        <LinearLayout
+            android:id="@+id/tuichu"
+            android:focusable="true"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_weight="2"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+            <TextView
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:background="@drawable/shape_fangkuang"
+                android:text="1"
+                android:textSize="12sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </LinearLayout>
 </LinearLayout>
