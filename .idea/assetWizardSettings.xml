@@ -148,8 +148,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_flush24" />
-                            <entry key="sourceFile" value="C:\Users\Tony\Desktop\刷新.svg" />
+                            <entry key="outputName" value="ic_close24" />
+                            <entry key="sourceFile" value="C:\Users\Tony\Desktop\叉.svg" />
                           </map>
                         </option>
                       </PersistentState>

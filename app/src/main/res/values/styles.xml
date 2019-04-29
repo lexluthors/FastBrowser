@@ -41,4 +41,7 @@
     <style name="AppTheme_Load.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     <style name="AppTheme_Load.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+    <style name="ToolbarPopupTheme" parent="ThemeOverlay.AppCompat.Light"><!--白色menu面板-->
+        <item name="android:background">@color/white</item>
+    </style>
 </resources>

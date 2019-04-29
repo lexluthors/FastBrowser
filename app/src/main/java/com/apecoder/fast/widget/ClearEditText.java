@@ -51,13 +51,23 @@ public class ClearEditText extends AppCompatEditText implements OnFocusChangeLis
         if (mClearDrawable == null) { 
         	mClearDrawable = ContextCompat.getDrawable(getContext(),R.drawable.ic_clean24);
         } 
-        mClearDrawable.setBounds(0, 0, (int) (mClearDrawable.getIntrinsicWidth()*0.8), (int) (mClearDrawable.getIntrinsicHeight()*0.8));
+        mClearDrawable.setBounds(0, 0, (int) (mClearDrawable.getIntrinsicWidth()*0.7), (int) (mClearDrawable.getIntrinsicHeight()*0.7));
         setClearIconVisible(false); 
         setOnFocusChangeListener(this); 
         addTextChangedListener(this); 
     } 
- 
- 
+
+    public void hideDrawable(boolean flag){
+        if(flag){
+            mClearDrawable.setBounds(0, 0, 0, 0);
+            return;
+        }
+        if (mClearDrawable == null) {
+            mClearDrawable = ContextCompat.getDrawable(getContext(),R.drawable.ic_clean24);
+        }
+        mClearDrawable.setBounds(0, 0, (int) (mClearDrawable.getIntrinsicWidth()*0.7), (int) (mClearDrawable.getIntrinsicHeight()*0.7));
+    }
+
     /**
      * 因为我们不能直接给EditText设置点击事件，所以我们用记住我们按下的位置来模拟点击事件
      * 当我们按下的位置 在  EditText的宽度 - 图标到控件右边的间距 - 图标的宽度  和
