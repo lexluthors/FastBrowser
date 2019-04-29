@@ -1,23 +1,31 @@
 package com.apecoder.fast.Activity;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.view.KeyEvent;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.apecoder.fast.R;
-import com.apecoder.fast.bean.ClickEvent;
+import com.apecoder.fast.adapter.FragmentListAdapter;
+import com.apecoder.fast.bean.FragmentData;
 import com.apecoder.fast.bean.TabEvent;
 import com.apecoder.fast.fragment.WebFragment;
+import com.apecoder.fast.util.OtherUtils;
+import com.github.ikidou.fragmentBackHandler.BackHandlerHelper;
 import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import org.greenrobot.eventbus.EventBus;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -56,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        WebFragment webFragment = WebFragment.newInstance("", "");
+        WebFragment webFragment = WebFragment.newInstance("主页", "");
         transaction.add(R.id.container, webFragment);
         transaction.commitAllowingStateLoss();
         // AgentWeb mAgentWeb = AgentWeb.with(this)//传入Activity
@@ -154,18 +162,63 @@ public class MainActivity extends AppCompatActivity {
                 EventBus.getDefault().post(new TabEvent(4));
                 break;
             case R.id.add:
-                EventBus.getDefault().post(new TabEvent(5));
+                showDialog();
                 break;
         }
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//    @Override
+//    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//
+//        ClickEvent clickEvent = new ClickEvent();
+//        clickEvent.setKeyCode(keyCode);
+//        clickEvent.setEvent(event);
+//        EventBus.getDefault().post(clickEvent);
+//
+//        return super.onKeyDown();
+//    }
 
-        ClickEvent clickEvent = new ClickEvent();
-        clickEvent.setKeyCode(keyCode);
-        clickEvent.setEvent(event);
-        EventBus.getDefault().post(clickEvent);
-        return true;
+    @Override
+    public void onBackPressed() {
+        if (!BackHandlerHelper.handleBackPress(this)) {
+            super.onBackPressed();
+        }
+    }
+
+    RecyclerView recyclerView;
+    List<FragmentData> fragmentDataList = new ArrayList<>();
+    FragmentListAdapter adapter;
+    Dialog dialog;
+
+    private void addFragment() {
+        adapter = new FragmentListAdapter(fragmentDataList);
+        View view = getLayoutInflater().inflate(R.layout.dialog_list, null);
+        recyclerView = view.findViewById(R.id.recyclerview);
+        LinearLayout linearLayout = view.findViewById(R.id.add_fragment);
+        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
+        recyclerView.setAdapter(adapter);
+        dialog = OtherUtils.getMenuDialog(MainActivity.this, view);
+
+        linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentData fragmentData = new FragmentData();
+                WebFragment webFragment = WebFragment.newInstance("主页", "");
+                fragmentData.setTitle(webFragment.getTitle());
+                fragmentData.setFragment(webFragment);
+                fragmentData.setIcon(webFragment.getIcon());
+                fragmentDataList.add(fragmentData);
+                adapter.notifyDataSetChanged();
+            }
+        });
+        dialog.show();
+    }
+
+    private void showDialog(){
+        if(dialog==null){
+            addFragment();
+        }else{
+            dialog.show();
+        }
     }
 }

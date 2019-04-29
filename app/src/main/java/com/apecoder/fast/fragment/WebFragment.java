@@ -33,6 +33,8 @@ import com.apecoder.fast.util.AppValidationMgr;
 import com.apecoder.fast.util.ImeUtil;
 import com.apecoder.fast.util.OtherUtils;
 import com.apecoder.fast.widget.ClearEditText;
+import com.github.ikidou.fragmentBackHandler.BackHandlerHelper;
+import com.github.ikidou.fragmentBackHandler.FragmentBackHandler;
 import com.just.agentweb.AgentWeb;
 import com.just.agentweb.WebChromeClient;
 import com.just.agentweb.WebViewClient;
@@ -46,7 +48,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
-public class WebFragment extends Fragment {
+public class WebFragment extends Fragment implements FragmentBackHandler {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "url";
@@ -69,6 +71,7 @@ public class WebFragment extends Fragment {
 
     AgentWeb mAgentWeb;
     String url = "";
+    Bitmap icon;
 
     public WebFragment() {
         // Required empty public constructor
@@ -194,6 +197,12 @@ public class WebFragment extends Fragment {
 //            clearEdittext.setText(title);
             titleText.setText(title);
         }
+
+        @Override
+        public void onReceivedIcon(WebView view, Bitmap icon2) {
+            super.onReceivedIcon(view, icon2);
+            icon = icon2;
+        }
     };
 
     @Override
@@ -299,13 +308,13 @@ public class WebFragment extends Fragment {
     //eventbus监听回调，主线程
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(TabEvent tabEvent) {
-        Log.e("外面","nima dlaj拉了国际");
+        Log.e("外面","ddddddd");
         if(!isHidden()){
             if(mAgentWeb==null){
                 return;
             }
             WebView webView = mAgentWeb.getWebCreator().getWebView();
-            Log.e("","nima dlaj拉了国际");
+            Log.e("","bbbbbbbbbbb");
             //可见的
             switch (tabEvent.getEvent()){
                 case 1:
@@ -341,4 +350,33 @@ public class WebFragment extends Fragment {
         }
     }
 
+    @Override
+    public boolean onBackPressed() {
+        if(mAgentWeb==null){
+            return false;
+        }
+        WebView webView = mAgentWeb.getWebCreator().getWebView();
+        if (webView.canGoBack()) {
+            //外理返回键
+            webView.goBack();
+            return true;
+        } else {
+            // 如果不包含子Fragment
+            // 或子Fragment没有外理back需求
+            // 可如直接 return false;
+            // 注：如果Fragment/Activity 中可以使用ViewPager 代替 this
+            //
+            return BackHandlerHelper.handleBackPress(this);
+        }
+    }
+
+    public String getTitle(){
+        if(titleText==null){
+            return "主页";
+        }
+        return titleText.getText().toString();
+    }
+    public Bitmap getIcon(){
+        return icon;
+    }
 }

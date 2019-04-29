@@ -42,4 +42,6 @@ dependencies {
     implementation 'com.github.Justson:Downloader:v4.0.3'// (可选)
 
     implementation 'org.greenrobot:eventbus:3.1.1'
+    implementation 'com.github.ikidou:FragmentBackHandler:2.1'
+    implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.46'
 }
