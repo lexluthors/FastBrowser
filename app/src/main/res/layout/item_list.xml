@@ -2,16 +2,33 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:orientation="horizontal"
+              android:focusable="true"
+              android:clickable="true"
+              android:background="?attr/selectableItemBackground"
               android:gravity="center_vertical"
-              android:layout_height="30dp">
+              android:layout_height="38dp">
 
     <ImageView
+        android:src="@mipmap/icon_fast"
+        android:layout_marginStart="15dp"
         android:id="@+id/iv"
-        android:layout_width="30dp"
-        android:layout_height="30dp"/>
+        android:layout_width="16dp"
+        android:layout_height="16dp"/>
     <TextView
+        android:layout_weight="1"
+        android:text="主页"
+        android:singleLine="true"
+        android:gravity="center_vertical"
         android:id="@+id/tv"
+        android:layout_marginStart="7dp"
         android:textColor="@color/main_gray"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <ImageView
+        android:id="@+id/close_fragment"
+        android:layout_marginEnd="15dp"
+        android:src="@drawable/ic_close24_black"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 </LinearLayout>
