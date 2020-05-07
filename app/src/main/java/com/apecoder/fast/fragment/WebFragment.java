@@ -161,6 +161,7 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
                                 .go(url);
                     } else {
                         mAgentWeb.getWebCreator().getWebView().loadUrl(url);
+                        mAgentWeb.getWebCreator().getWebView().setVisibility(View.VISIBLE);
                     }
                 }
                 return false;
@@ -332,7 +333,13 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
                     break;
                 case 4:
                     //主页
-                    webView.loadUrl("https://www.baidu.com");
+                    webView.setVisibility(View.GONE);
+                    titleText.setVisibility(View.GONE);
+                    clearEdittext.setVisibility(View.VISIBLE);
+                    clearEdittext.requestFocus();
+                    clearEdittext.setFocusable(true);
+                    clearEdittext.setText("");
+                    ImeUtil.showSoftKeyboard(clearEdittext);
                     break;
                 case 5:
                     break;
@@ -358,7 +365,11 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
         WebView webView = mAgentWeb.getWebCreator().getWebView();
         if (webView.canGoBack()) {
             //外理返回键
-            webView.goBack();
+            if(!mAgentWeb.getWebCreator().getWebView().isShown()){
+                mAgentWeb.getWebCreator().getWebView().setVisibility(View.VISIBLE);
+            }else{
+                webView.goBack();
+            }
             return true;
         } else {
             // 如果不包含子Fragment
