@@ -107,6 +107,62 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
         return view;
     }
 
+    class EditActionListen implements ClearEditText.OnEditorActionListener {
+        public EditActionListen() {
+            EventBus.getDefault().register(this);
+        }
+
+        @Subscribe(threadMode = ThreadMode.ASYNC)
+        public void onBrush(int flag) {
+            if (flag == 1) {
+                onEditorAction(null,EditorInfo.IME_ACTION_GO,null);
+            }
+        }
+
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_GO) {
+                if (TextUtils.isEmpty(clearEdittext.getText().toString())) {
+                    Toast.makeText(getActivity(), "请输入内容", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+//                    Intent intent = new Intent(getActivity(), SearchResultActivity.class);
+//                    intent.putExtra("key", clearEdittext.getText().toString());
+//                    startActivity(intent);
+                url = clearEdittext.getText().toString();
+                if (!AppValidationMgr.isURL(url)) {
+                    url = BaseUrl.BASE_BAIDU_SEARCH_URL + clearEdittext.getText().toString();
+                    Log.e("不是网址>>>>", url);
+                } else {
+                    if (url.contains("http://") || url.contains("https://")) {
+                    } else {
+                        url = "http://" + url;
+                    }
+                }
+                Log.e("是网址>>>>", url);
+
+                ImeUtil.hideSoftKeyboard(titleText);
+                clearEdittext.setVisibility(View.GONE);
+                titleText.setVisibility(View.VISIBLE);
+
+                if (mAgentWeb == null) {
+                    mAgentWeb = AgentWeb.with(getActivity())
+                            .setAgentWebParent(container, new LinearLayout.LayoutParams(-1, -1))
+                            .useDefaultIndicator()
+                            .setWebViewClient(mWebViewClient)
+                            .setWebChromeClient(mWebChromeClient)
+                            .createAgentWeb()
+                            .ready()
+                            .go(url);
+                } else {
+                    mAgentWeb.getWebCreator().getWebView().loadUrl(url);
+                    mAgentWeb.getWebCreator().getWebView().setVisibility(View.VISIBLE);
+                }
+            }
+            return false;
+        }
+    }
+
     private void initData() {
 //        toolbar.setNavigationIcon(R.drawable.ic_webview_finish);
 //        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -123,51 +179,7 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
 //            public void onClick(View v) {
 //            }
 //        });
-        clearEdittext.setOnEditorActionListener(new ClearEditText.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-                if (i == EditorInfo.IME_ACTION_GO) {
-                    if (TextUtils.isEmpty(clearEdittext.getText().toString())) {
-                        Toast.makeText(getActivity(), "请输入内容", Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-//                    Intent intent = new Intent(getActivity(), SearchResultActivity.class);
-//                    intent.putExtra("key", clearEdittext.getText().toString());
-//                    startActivity(intent);
-                    url = clearEdittext.getText().toString();
-                    if (!AppValidationMgr.isURL(url)) {
-                        url = BaseUrl.BASE_BAIDU_SEARCH_URL + clearEdittext.getText().toString();
-                        Log.e("不是网址>>>>", url);
-                    } else {
-                        if (url.contains("http://") || url.contains("https://")) {
-                        } else {
-                            url = "http://" + url;
-                        }
-                    }
-                    Log.e("是网址>>>>", url);
-
-                    ImeUtil.hideSoftKeyboard(titleText);
-                    clearEdittext.setVisibility(View.GONE);
-                    titleText.setVisibility(View.VISIBLE);
-
-                    if (mAgentWeb == null) {
-                        mAgentWeb = AgentWeb.with(getActivity())
-                                .setAgentWebParent(container, new LinearLayout.LayoutParams(-1, -1))
-                                .useDefaultIndicator()
-                                .setWebViewClient(mWebViewClient)
-                                .setWebChromeClient(mWebChromeClient)
-                                .createAgentWeb()
-                                .ready()
-                                .go(url);
-                    } else {
-                        mAgentWeb.getWebCreator().getWebView().loadUrl(url);
-                        mAgentWeb.getWebCreator().getWebView().setVisibility(View.VISIBLE);
-                    }
-                }
-                return false;
-            }
-        });
-
+        clearEdittext.setOnEditorActionListener(new EditActionListen());
     }
 
     private WebViewClient mWebViewClient = new WebViewClient() {
@@ -175,14 +187,14 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
         public void onPageStarted(WebView view, String url2, Bitmap favicon) {
             //do you  work
             flush_flag = false;
-            flush.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_close24));
+            flush.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_close24));
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
             Log.e("", "完成了" + url);
-            flush.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_flush242));
+            flush.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_flush242));
             flush_flag = true;
         }
     };
@@ -290,17 +302,17 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
                 ImeUtil.showSoftKeyboard(clearEdittext);
                 break;
             case R.id.flush:
-                if(flush_flag){
-                    if(mAgentWeb!=null){
-                        flush.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_close24));
+                if (flush_flag) {
+                    if (mAgentWeb != null) {
+                        flush.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_close24));
                         mAgentWeb.getWebCreator().getWebView().reload();
                     }
-                }else {
+                } else {
                     //停止加载
-                    if(mAgentWeb!=null){
+                    if (mAgentWeb != null) {
                         mAgentWeb.getWebCreator().getWebView().stopLoading();
                     }
-                    flush.setImageDrawable(ContextCompat.getDrawable(getActivity(),R.drawable.ic_flush242));
+                    flush.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_flush242));
                 }
                 break;
         }
@@ -309,23 +321,23 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
     //eventbus监听回调，主线程
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(TabEvent tabEvent) {
-        Log.e("外面","ddddddd");
-        if(!isHidden()){
-            if(mAgentWeb==null){
+        Log.e("外面", "ddddddd");
+        if (!isHidden()) {
+            if (mAgentWeb == null) {
                 return;
             }
             WebView webView = mAgentWeb.getWebCreator().getWebView();
-            Log.e("","bbbbbbbbbbb");
+            Log.e("", "bbbbbbbbbbb");
             //可见的
-            switch (tabEvent.getEvent()){
+            switch (tabEvent.getEvent()) {
                 case 1:
                     //后退
-                    if(webView.canGoBack()){
+                    if (webView.canGoBack()) {
                         webView.goBack();
                     }
                     break;
                 case 2:
-                    if(webView.canGoForward()){
+                    if (webView.canGoForward()) {
                         webView.goForward();
                     }
                     break;
@@ -350,7 +362,7 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
     //监听返回键，处理事件
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onKeyEvent(ClickEvent clickEvent) {
-        if(!isHidden()){
+        if (!isHidden()) {
             if (mAgentWeb.handleKeyEvent(clickEvent.getKeyCode(), clickEvent.getEvent())) {
                 return;
             }
@@ -359,15 +371,15 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
 
     @Override
     public boolean onBackPressed() {
-        if(mAgentWeb==null){
+        if (mAgentWeb == null) {
             return false;
         }
         WebView webView = mAgentWeb.getWebCreator().getWebView();
         if (webView.canGoBack()) {
             //外理返回键
-            if(!mAgentWeb.getWebCreator().getWebView().isShown()){
+            if (!mAgentWeb.getWebCreator().getWebView().isShown()) {
                 mAgentWeb.getWebCreator().getWebView().setVisibility(View.VISIBLE);
-            }else{
+            } else {
                 webView.goBack();
             }
             return true;
@@ -381,13 +393,14 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
         }
     }
 
-    public String getTitle(){
-        if(titleText==null){
+    public String getTitle() {
+        if (titleText == null) {
             return "主页";
         }
         return titleText.getText().toString();
     }
-    public Bitmap getIcon(){
+
+    public Bitmap getIcon() {
         return icon;
     }
 }
