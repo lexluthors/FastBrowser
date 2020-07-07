@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.apecoder.fast.R;
 import com.apecoder.fast.bean.ClickEvent;
+import com.apecoder.fast.bean.EventTitle;
 import com.apecoder.fast.bean.TabEvent;
 import com.apecoder.fast.config.BaseUrl;
 import com.apecoder.fast.util.AppValidationMgr;
@@ -73,7 +74,8 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
     private String mParam3;
 
     AgentWeb mAgentWeb;
-    String url = "";
+    AgentWeb.PreAgentWeb mPreAgentWeb;
+    String currentUrl = "";
     Bitmap icon;
 
     public WebFragment() {
@@ -102,13 +104,22 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, ViewGroup container2,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.content_main2, container, false);
+        View view = inflater.inflate(R.layout.content_main2, container2, false);
         unbinder = ButterKnife.bind(this, view);
         EventBus.getDefault().register(this);
         initData();
+
+        mPreAgentWeb = AgentWeb.with(getActivity())
+                .setAgentWebParent(container, new LinearLayout.LayoutParams(-1, -1))
+                .useDefaultIndicator()
+                .setWebViewClient(mWebViewClient)
+                .setWebChromeClient(mWebChromeClient)
+                .createAgentWeb()
+                .ready();
+        mAgentWeb = mPreAgentWeb.get();
         return view;
     }
 
@@ -134,35 +145,25 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
 //                    Intent intent = new Intent(getActivity(), SearchResultActivity.class);
 //                    intent.putExtra("key", clearEdittext.getText().toString());
 //                    startActivity(intent);
-                url = clearEdittext.getText().toString();
-                if (!AppValidationMgr.isURL(url)) {
-                    url = BaseUrl.BASE_BAIDU_SEARCH_URL + clearEdittext.getText().toString();
-                    Log.e("不是网址>>>>", url);
+                currentUrl = clearEdittext.getText().toString();
+                if (!AppValidationMgr.isURL(currentUrl)) {
+                    currentUrl = BaseUrl.BASE_BAIDU_SEARCH_URL + clearEdittext.getText().toString();
+                    Log.e("不是网址>>>>", currentUrl);
                 } else {
-                    if (url.contains("http://") || url.contains("https://")) {
+                    if (currentUrl.contains("http://") || currentUrl.contains("https://")) {
                     } else {
-                        url = "http://" + url;
+                        currentUrl = "http://" + currentUrl;
                     }
                 }
-                Log.e("是网址>>>>", url);
+                Log.e("是网址>>>>", currentUrl);
 
                 ImeUtil.hideSoftKeyboard(titleText);
                 clearEdittext.setVisibility(View.GONE);
                 titleText.setVisibility(View.VISIBLE);
 
-                if (mAgentWeb == null) {
-                    mAgentWeb = AgentWeb.with(getActivity())
-                            .setAgentWebParent(container, new LinearLayout.LayoutParams(-1, -1))
-                            .useDefaultIndicator()
-                            .setWebViewClient(mWebViewClient)
-                            .setWebChromeClient(mWebChromeClient)
-                            .createAgentWeb()
-                            .ready()
-                            .go(url);
-                } else {
-                    mAgentWeb.getWebCreator().getWebView().loadUrl(url);
-                    mAgentWeb.getWebCreator().getWebView().setVisibility(View.VISIBLE);
-                }
+                mPreAgentWeb.go(currentUrl);
+//                mAgentWeb.getWebCreator().getWebView().loadUrl(currentUrl);
+                mAgentWeb.getWebCreator().getWebView().setVisibility(View.VISIBLE);
             }
             return false;
         }
@@ -194,7 +195,7 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
             flush_flag = false;
             flush.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_close24));
             clearEdittext.setText(url2);
-            url = clearEdittext.getText().toString();
+            currentUrl = clearEdittext.getText().toString();
         }
 
         @Override
@@ -204,13 +205,14 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
             flush.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_flush242));
             flush_flag = true;
             clearEdittext.setText(url);
-            url = clearEdittext.getText().toString();
+            currentUrl = clearEdittext.getText().toString();
         }
     };
     private WebChromeClient mWebChromeClient = new WebChromeClient() {
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
             //do you work
+            super.onProgressChanged(view,newProgress);
         }
 
         @Override
@@ -218,6 +220,7 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
             super.onReceivedTitle(view, title);
 //            clearEdittext.setText(title);
             titleText.setText(title);
+            EventBus.getDefault().post(new EventTitle(title,mParam3));
         }
 
         @Override
@@ -244,17 +247,17 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
             case R.id.menu_share:
                 Intent localIntent = new Intent("android.intent.action.SEND");
                 localIntent.setType("text/plain");
-                localIntent.putExtra("android.intent.extra.TEXT", url);
+                localIntent.putExtra("android.intent.extra.TEXT", currentUrl);
                 localIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(localIntent);
                 break;
             case R.id.menu_copy_link:
-                if (OtherUtils.copyText(getActivity(), url)) {
+                if (OtherUtils.copyText(getActivity(), currentUrl)) {
                     Snackbar.make(container, "链接复制成功", Snackbar.LENGTH_LONG).show();
                 }
                 break;
             case R.id.menu_open_with:
-                OtherUtils.openWithBrowser(getActivity(), url);
+                OtherUtils.openWithBrowser(getActivity(), currentUrl);
                 break;
         }
         return super.onOptionsItemSelected(item);

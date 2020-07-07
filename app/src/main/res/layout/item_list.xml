@@ -27,7 +27,7 @@
         android:layout_height="match_parent"/>
 
     <ImageView
-        android:padding="6dp"
+        android:padding="8dp"
         android:id="@+id/close_fragment"
         android:layout_marginEnd="15dp"
         android:src="@drawable/ic_close24_black"

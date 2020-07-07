@@ -5,25 +5,31 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.apecoder.fast.R;
+import com.apecoder.fast.bean.EventTitle;
 import com.apecoder.fast.bean.FragmentData;
 import com.apecoder.fast.bean.TabEvent;
 import com.apecoder.fast.fragment.WebFragment;
 import com.apecoder.fast.util.ImeUtil;
 import com.apecoder.fast.util.OtherUtils;
+import com.apecoder.fast.widget.DiyDialog;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.github.ikidou.fragmentBackHandler.BackHandlerHelper;
@@ -31,7 +37,10 @@ import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        EventBus.getDefault().register(this);
 
         transaction = getSupportFragmentManager().beginTransaction();
         WebFragment webFragment = WebFragment.newInstance("主页", "");
@@ -141,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     List<FragmentData> fragmentDataList = new ArrayList<>();
     FragmentListAdapter adapter;
-    Dialog dialog;
+    DiyDialog dialog;
 
     private void addFragment() {
         adapter = new FragmentListAdapter(fragmentDataList);
@@ -167,8 +177,10 @@ public class MainActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 transaction.add(R.id.container, webFragment);
                 transaction.show(webFragment);
-                transaction.commitAllowingStateLoss();
+                transaction.commit();
                 fragmentNum.setText(String.valueOf(fragmentDataList.size()));
+                currentFlag = webFragment.getArguments().getString(ARG_PARAM3);
+
             }
         });
         dialog.show();
@@ -178,20 +190,21 @@ public class MainActivity extends AppCompatActivity {
             transaction = getSupportFragmentManager().beginTransaction();
             hideFragment();
             transaction.show(fragmentDataList.get(position).getFragment());
-            transaction.commitAllowingStateLoss();
+            transaction.commit();
+            currentFlag = fragmentDataList.get(position).getFragment().getArguments().getString(ARG_PARAM3);
         });
     }
 
     private void hideFragment() {
         for (int i = 0; i < fragmentDataList.size(); i++) {
             transaction.hide(fragmentDataList.get(i).getFragment());
+//            if(currentFlag.equals(fragmentDataList.get(i).getFragment().getArguments().getString(ARG_PARAM3))){
+//            }
         }
     }
 
     private void removeFragment(Fragment fragment,String timestamp) {
         transaction = getSupportFragmentManager().beginTransaction();
-//        transaction.remove(fragment);
-//        transaction.commitAllowingStateLoss();
         for (int i = 0; i < fragmentDataList.size(); i++) {
             String flag = fragmentDataList.get(i).getFragment().getArguments().getString(ARG_PARAM3);
             if(TextUtils.isEmpty(flag)){
@@ -200,12 +213,15 @@ public class MainActivity extends AppCompatActivity {
             if(flag.contentEquals(timestamp)){
                 transaction.remove(fragmentDataList.get(i).getFragment()).commit();
                 fragmentDataList.remove(i);
+                adapter.notifyDataSetChanged();
                 if (fragmentDataList.size() > 0) {
                     //显示最后一个
                     transaction.show(fragmentDataList.get(fragmentDataList.size()-1).getFragment());
+                    currentFlag = fragmentDataList.get(fragmentDataList.size()-1).getFragment().getArguments().getString(ARG_PARAM3);
                 }else{
                     //新增一个fragment
                     dialog.dismiss();
+                    dialog.cancel();
                     transaction = getSupportFragmentManager().beginTransaction();
                     FragmentData fragmentData = new FragmentData();
                     WebFragment webFragment = WebFragment.newInstance("主页", "");
@@ -215,8 +231,8 @@ public class MainActivity extends AppCompatActivity {
                     fragmentDataList.add(fragmentData);
                     transaction.add(R.id.container, webFragment);
                     transaction.show(webFragment);
-                    transaction.commitAllowingStateLoss();
-                    ImeUtil.showSoftKeyboard(fragmentNum);
+                    transaction.commit();
+                    currentFlag = webFragment.getArguments().getString(ARG_PARAM3);
                 }
                 adapter.notifyDataSetChanged();
                 break;
@@ -224,6 +240,55 @@ public class MainActivity extends AppCompatActivity {
         }
         fragmentNum.setText(String.valueOf(fragmentDataList.size()));
     }
+
+    @Override
+    public boolean dispatchKeyEvent(@NonNull KeyEvent event) {
+        if (Build.VERSION.SDK_INT == 28) {
+            try {
+                ViewParent viewRootImpl = getWindow().getDecorView().getParent();
+                Class viewRootImplClass = viewRootImpl.getClass();
+
+                Field mAttachInfoField = viewRootImplClass.getDeclaredField("mAttachInfo");
+                mAttachInfoField.setAccessible(true);
+                Object mAttachInfo = mAttachInfoField.get(viewRootImpl);
+                Class mAttachInfoClass = mAttachInfo.getClass();
+
+                Field mHasWindowFocusField = mAttachInfoClass.getDeclaredField("mHasWindowFocus");
+                mHasWindowFocusField.setAccessible(true);
+                mHasWindowFocusField.set(mAttachInfo, true);
+                boolean mHasWindowFocus = (boolean) mHasWindowFocusField.get(mAttachInfo);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return super.dispatchKeyEvent(event);
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
+    //eventbus监听回调，主线程,更新列表title
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(EventTitle eventTitle) {
+        //更新列表title
+        for (int i = 0; i < fragmentDataList.size(); i++) {
+            String flag = fragmentDataList.get(i).getFragment().getArguments().getString(ARG_PARAM3);
+            assert flag != null;
+            if(flag.equals(eventTitle.getFlag())){
+                fragmentDataList.get(i).setTitle(eventTitle.getTitle());
+                if(null!=adapter){
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }
+    }
+
 
     private void showDialog() {
         if (dialog == null) {

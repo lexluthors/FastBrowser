@@ -13,6 +13,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.apecoder.fast.R;
+import com.apecoder.fast.widget.DiyDialog;
 
 /**
  * Created by Tony on 2017/9/5.
@@ -44,9 +45,9 @@ public class OtherUtils {
     }
 
 
-    public static Dialog getMenuDialog(Activity context, View view) {
+    public static DiyDialog getMenuDialog(Activity context, View view) {
 
-        final Dialog dialog = new Dialog(context, R.style.MenuDialogStyle);
+        final DiyDialog dialog = new DiyDialog(context, R.style.MenuDialogStyle);
         dialog.setContentView(view);
         Window window = dialog.getWindow();
         WindowManager.LayoutParams lp = window.getAttributes();

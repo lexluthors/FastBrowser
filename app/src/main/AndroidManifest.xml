@@ -26,7 +26,9 @@
         <activity
             android:name=".Activity.MainActivity"
             android:windowSoftInputMode="adjustPan"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:hardwareAccelerated="true"
+            android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
