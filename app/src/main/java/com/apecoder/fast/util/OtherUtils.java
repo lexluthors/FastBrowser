@@ -7,7 +7,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -53,18 +52,18 @@ public class OtherUtils {
         WindowManager.LayoutParams lp = window.getAttributes();
         dialog.setCanceledOnTouchOutside(true);
         dialog.setCancelable(true);
-        int screenW = getScreenWidth(context);
-        lp.width = screenW;
+        lp.width = ScreenUtil.getScreenWidth(context);;
+//        lp.height = ScreenUtil.getScreenHeight(context)/3*2;
         window.setGravity(Gravity.BOTTOM); // 此处可以设置dialog显示的位置
         window.setWindowAnimations(R.style.MenuDialogAnimation); // 添加动画
         return dialog;
     }
 
-    public static int getScreenWidth(Context context) {
-        WindowManager wm = (WindowManager) context
-                .getSystemService(Context.WINDOW_SERVICE);
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(outMetrics);
-        return outMetrics.widthPixels;
-    }
+//    public static int getScreenWidth(Context context) {
+//        WindowManager wm = (WindowManager) context
+//                .getSystemService(Context.WINDOW_SERVICE);
+//        DisplayMetrics outMetrics = new DisplayMetrics();
+//        wm.getDefaultDisplay().getMetrics(outMetrics);
+//        return outMetrics.widthPixels;
+//    }
 }

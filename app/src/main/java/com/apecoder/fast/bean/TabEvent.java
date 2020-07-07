@@ -6,12 +6,22 @@ package com.apecoder.fast.bean;
  * Author: Allen
  */
 public class TabEvent {
-    public TabEvent(int event) {
+    public TabEvent(int event,String flag) {
         this.event = event;
+        this.flag = flag;
     }
 
     //1,2,3,4,5 后退，前进，设置，主页
     private int event;
+    private String flag;
+
+    public String getFlag() {
+        return flag;
+    }
+
+    public void setFlag(String flag) {
+        this.flag = flag;
+    }
 
     public int getEvent() {
         return event;

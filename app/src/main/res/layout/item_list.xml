@@ -6,7 +6,7 @@
               android:clickable="true"
               android:background="?attr/selectableItemBackground"
               android:gravity="center_vertical"
-              android:layout_height="38dp">
+              android:layout_height="45dp">
 
     <ImageView
         android:src="@mipmap/icon_fast"
@@ -20,15 +20,17 @@
         android:singleLine="true"
         android:gravity="center_vertical"
         android:id="@+id/tv"
+        android:ellipsize="end"
         android:layout_marginStart="7dp"
         android:textColor="@color/main_gray"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"/>
 
     <ImageView
+        android:padding="6dp"
         android:id="@+id/close_fragment"
         android:layout_marginEnd="15dp"
         android:src="@drawable/ic_close24_black"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_width="@dimen/dp_40"
+        android:layout_height="@dimen/dp_40"/>
 </LinearLayout>

@@ -53,6 +53,7 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "url";
     private static final String ARG_PARAM2 = "param2";
+    public static final String ARG_PARAM3 = "flag";
     @BindView(R.id.clear_edittext)
     ClearEditText clearEdittext;
     @BindView(R.id.toolbar)
@@ -68,6 +69,8 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    //该fragment唯一标识,时间戳,毫秒
+    private String mParam3;
 
     AgentWeb mAgentWeb;
     String url = "";
@@ -83,6 +86,7 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_PARAM3, String.valueOf(System.currentTimeMillis()));
         fragment.setArguments(args);
         return fragment;
     }
@@ -93,6 +97,7 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+            mParam3 = getArguments().getString(ARG_PARAM3);
         }
     }
 
@@ -188,6 +193,8 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
             //do you  work
             flush_flag = false;
             flush.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_close24));
+            clearEdittext.setText(url2);
+            url = clearEdittext.getText().toString();
         }
 
         @Override
@@ -196,6 +203,8 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
             Log.e("", "完成了" + url);
             flush.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_flush242));
             flush_flag = true;
+            clearEdittext.setText(url);
+            url = clearEdittext.getText().toString();
         }
     };
     private WebChromeClient mWebChromeClient = new WebChromeClient() {
@@ -334,11 +343,17 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
                     //后退
                     if (webView.canGoBack()) {
                         webView.goBack();
+                        titleText.setVisibility(View.VISIBLE);
+                        clearEdittext.setVisibility(View.GONE);
+                        clearEdittext.clearFocus();
                     }
                     break;
                 case 2:
                     if (webView.canGoForward()) {
                         webView.goForward();
+                        titleText.setVisibility(View.VISIBLE);
+                        clearEdittext.setVisibility(View.GONE);
+                        clearEdittext.clearFocus();
                     }
                     break;
                 case 3:
@@ -369,6 +384,9 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
         }
     }
 
+    private void editShowHide(){
+    }
+
     @Override
     public boolean onBackPressed() {
         if (mAgentWeb == null) {
@@ -376,6 +394,9 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
         }
         WebView webView = mAgentWeb.getWebCreator().getWebView();
         if (webView.canGoBack()) {
+            titleText.setVisibility(View.VISIBLE);
+            clearEdittext.setVisibility(View.GONE);
+            clearEdittext.clearFocus();
             //外理返回键
             if (!mAgentWeb.getWebCreator().getWebView().isShown()) {
                 mAgentWeb.getWebCreator().getWebView().setVisibility(View.VISIBLE);

@@ -6,19 +6,23 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.apecoder.fast.R;
 import com.apecoder.fast.bean.FragmentData;
 import com.apecoder.fast.bean.TabEvent;
 import com.apecoder.fast.fragment.WebFragment;
+import com.apecoder.fast.util.ImeUtil;
 import com.apecoder.fast.util.OtherUtils;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -35,6 +39,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.functions.Consumer;
+
+import static com.apecoder.fast.fragment.WebFragment.ARG_PARAM3;
 
 public class MainActivity extends AppCompatActivity {
     @BindView(R.id.container)
@@ -53,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout layout;
     @BindView(R.id.activity_main)
     LinearLayout activityMain;
+    @BindView(R.id.fragmentNum)
+    TextView fragmentNum;
 
     //	@BindView(R.id.clear_edittext)
 //	ClearEditText clearEdittext;
@@ -60,7 +68,9 @@ public class MainActivity extends AppCompatActivity {
 //    Toolbar toolbar;
 //	@BindView(R.id.activity_main)
 //    LinearLayout activityMain;
-    Bitmap bitmap ;
+    Bitmap bitmap;
+    FragmentTransaction transaction;
+    String currentFlag="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +78,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction = getSupportFragmentManager().beginTransaction();
         WebFragment webFragment = WebFragment.newInstance("主页", "");
+        currentFlag = webFragment.getArguments().getString(ARG_PARAM3);
         transaction.add(R.id.container, webFragment);
         transaction.commitAllowingStateLoss();
+
 
         FragmentData fragmentData = new FragmentData();
         fragmentData.setTitle("主页");
@@ -102,16 +114,16 @@ public class MainActivity extends AppCompatActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.houtui:
-                EventBus.getDefault().post(new TabEvent(1));
+                EventBus.getDefault().post(new TabEvent(1,currentFlag));
                 break;
             case R.id.qianjin:
-                EventBus.getDefault().post(new TabEvent(2));
+                EventBus.getDefault().post(new TabEvent(2,currentFlag));
                 break;
             case R.id.setting:
-                EventBus.getDefault().post(new TabEvent(3));
+                EventBus.getDefault().post(new TabEvent(3,currentFlag));
                 break;
             case R.id.home:
-                EventBus.getDefault().post(new TabEvent(4));
+                EventBus.getDefault().post(new TabEvent(4,currentFlag));
                 break;
             case R.id.add:
                 showDialog();
@@ -143,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
         linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                transaction = getSupportFragmentManager().beginTransaction();
+                hideFragment();
+                dialog.dismiss();
                 FragmentData fragmentData = new FragmentData();
                 WebFragment webFragment = WebFragment.newInstance("主页", "");
                 fragmentData.setTitle("主页");
@@ -150,9 +165,64 @@ public class MainActivity extends AppCompatActivity {
                 fragmentData.setIcon(bitmap);
                 fragmentDataList.add(fragmentData);
                 adapter.notifyDataSetChanged();
+                transaction.add(R.id.container, webFragment);
+                transaction.show(webFragment);
+                transaction.commitAllowingStateLoss();
+                fragmentNum.setText(String.valueOf(fragmentDataList.size()));
             }
         });
         dialog.show();
+
+        adapter.setOnItemClickListener((adapter, view1, position) -> {
+            dialog.dismiss();
+            transaction = getSupportFragmentManager().beginTransaction();
+            hideFragment();
+            transaction.show(fragmentDataList.get(position).getFragment());
+            transaction.commitAllowingStateLoss();
+        });
+    }
+
+    private void hideFragment() {
+        for (int i = 0; i < fragmentDataList.size(); i++) {
+            transaction.hide(fragmentDataList.get(i).getFragment());
+        }
+    }
+
+    private void removeFragment(Fragment fragment,String timestamp) {
+        transaction = getSupportFragmentManager().beginTransaction();
+//        transaction.remove(fragment);
+//        transaction.commitAllowingStateLoss();
+        for (int i = 0; i < fragmentDataList.size(); i++) {
+            String flag = fragmentDataList.get(i).getFragment().getArguments().getString(ARG_PARAM3);
+            if(TextUtils.isEmpty(flag)){
+                continue;
+            }
+            if(flag.contentEquals(timestamp)){
+                transaction.remove(fragmentDataList.get(i).getFragment()).commit();
+                fragmentDataList.remove(i);
+                if (fragmentDataList.size() > 0) {
+                    //显示最后一个
+                    transaction.show(fragmentDataList.get(fragmentDataList.size()-1).getFragment());
+                }else{
+                    //新增一个fragment
+                    dialog.dismiss();
+                    transaction = getSupportFragmentManager().beginTransaction();
+                    FragmentData fragmentData = new FragmentData();
+                    WebFragment webFragment = WebFragment.newInstance("主页", "");
+                    fragmentData.setTitle("主页");
+                    fragmentData.setFragment(webFragment);
+                    fragmentData.setIcon(bitmap);
+                    fragmentDataList.add(fragmentData);
+                    transaction.add(R.id.container, webFragment);
+                    transaction.show(webFragment);
+                    transaction.commitAllowingStateLoss();
+                    ImeUtil.showSoftKeyboard(fragmentNum);
+                }
+                adapter.notifyDataSetChanged();
+                break;
+            }
+        }
+        fragmentNum.setText(String.valueOf(fragmentDataList.size()));
     }
 
     private void showDialog() {
@@ -181,17 +251,18 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void convert(BaseViewHolder helper, FragmentData mListBean) {
             ImageView mLogoGoods = (ImageView) helper.getView(R.id.iv);
-            helper.setText(R.id.tv,mListBean.getTitle());
+            helper.setText(R.id.tv, mListBean.getTitle());
             mLogoGoods.setImageBitmap(mListBean.getIcon());
             ImageView close = helper.getView(R.id.close_fragment);
             close.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(fragmentDataList.size()==1){
-                        return;
-                    }
-                    fragmentDataList.remove(helper.getLayoutPosition());
-                    notifyDataSetChanged();
+//                    if (fragmentDataList.size() == 1) {
+//                        return;
+//                    }
+                    removeFragment(mListBean.getFragment(),mListBean.getFragment().getArguments().getString(ARG_PARAM3));
+//                    fragmentDataList.remove(helper.getAdapterPosition());
+//                    notifyDataSetChanged();
                 }
             });
         }
