@@ -1,7 +1,6 @@
 package com.apecoder.fast.util;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;

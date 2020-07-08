@@ -1,10 +1,11 @@
 package com.apecoder.fast.Activity;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewParent;
@@ -25,9 +27,9 @@ import android.widget.TextView;
 import com.apecoder.fast.R;
 import com.apecoder.fast.bean.EventTitle;
 import com.apecoder.fast.bean.FragmentData;
+import com.apecoder.fast.bean.OutLinkEvent;
 import com.apecoder.fast.bean.TabEvent;
 import com.apecoder.fast.fragment.WebFragment;
-import com.apecoder.fast.util.ImeUtil;
 import com.apecoder.fast.util.OtherUtils;
 import com.apecoder.fast.widget.DiyDialog;
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 //    LinearLayout activityMain;
     Bitmap bitmap;
     FragmentTransaction transaction;
-    String currentFlag="";
+    String currentFlag = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,16 +126,16 @@ public class MainActivity extends AppCompatActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.houtui:
-                EventBus.getDefault().post(new TabEvent(1,currentFlag));
+                EventBus.getDefault().post(new TabEvent(1, currentFlag));
                 break;
             case R.id.qianjin:
-                EventBus.getDefault().post(new TabEvent(2,currentFlag));
+                EventBus.getDefault().post(new TabEvent(2, currentFlag));
                 break;
             case R.id.setting:
-                EventBus.getDefault().post(new TabEvent(3,currentFlag));
+                EventBus.getDefault().post(new TabEvent(3, currentFlag));
                 break;
             case R.id.home:
-                EventBus.getDefault().post(new TabEvent(4,currentFlag));
+                EventBus.getDefault().post(new TabEvent(4, currentFlag));
                 break;
             case R.id.add:
                 showDialog();
@@ -203,22 +205,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void removeFragment(Fragment fragment,String timestamp) {
+    private void removeFragment(Fragment fragment, String timestamp) {
         transaction = getSupportFragmentManager().beginTransaction();
         for (int i = 0; i < fragmentDataList.size(); i++) {
             String flag = fragmentDataList.get(i).getFragment().getArguments().getString(ARG_PARAM3);
-            if(TextUtils.isEmpty(flag)){
+            if (TextUtils.isEmpty(flag)) {
                 continue;
             }
-            if(flag.contentEquals(timestamp)){
+            if (flag.contentEquals(timestamp)) {
                 transaction.remove(fragmentDataList.get(i).getFragment()).commit();
                 fragmentDataList.remove(i);
                 adapter.notifyDataSetChanged();
                 if (fragmentDataList.size() > 0) {
                     //显示最后一个
-                    transaction.show(fragmentDataList.get(fragmentDataList.size()-1).getFragment());
-                    currentFlag = fragmentDataList.get(fragmentDataList.size()-1).getFragment().getArguments().getString(ARG_PARAM3);
-                }else{
+                    transaction.show(fragmentDataList.get(fragmentDataList.size() - 1).getFragment());
+                    currentFlag = fragmentDataList.get(fragmentDataList.size() - 1).getFragment().getArguments().getString(ARG_PARAM3);
+                } else {
                     //新增一个fragment
                     dialog.dismiss();
                     dialog.cancel();
@@ -280,9 +282,9 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < fragmentDataList.size(); i++) {
             String flag = fragmentDataList.get(i).getFragment().getArguments().getString(ARG_PARAM3);
             assert flag != null;
-            if(flag.equals(eventTitle.getFlag())){
+            if (flag.equals(eventTitle.getFlag())) {
                 fragmentDataList.get(i).setTitle(eventTitle.getTitle());
-                if(null!=adapter){
+                if (null != adapter) {
                     adapter.notifyDataSetChanged();
                 }
             }
@@ -322,10 +324,10 @@ public class MainActivity extends AppCompatActivity {
             close.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    if (fragmentDataList.size() == 1) {
-//                        return;
-//                    }
-                    removeFragment(mListBean.getFragment(),mListBean.getFragment().getArguments().getString(ARG_PARAM3));
+                    if (fragmentDataList.size() == 1) {
+                        return;
+                    }
+                    removeFragment(mListBean.getFragment(), mListBean.getFragment().getArguments().getString(ARG_PARAM3));
 //                    fragmentDataList.remove(helper.getAdapterPosition());
 //                    notifyDataSetChanged();
                 }
@@ -334,4 +336,39 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    /**
+     * 使用singleTask启动模式的Activity在系统中只会存在一个实例。
+     * 如果这个实例已经存在，intent就会通过onNewIntent传递到这个Activity。
+     * 否则新的Activity实例被创建。
+     */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        getDataFromBrowser(intent);
+    }
+
+    /**
+     * 作为三方浏览器打开传过来的值
+     * Scheme: https
+     * host: www.jianshu.com
+     * path: /p/1cbaf784c29c
+     * url = scheme + "://" + host + path;
+     */
+    private void getDataFromBrowser(Intent intent) {
+        Uri data = intent.getData();
+        if (data != null) {
+            try {
+                String scheme = data.getScheme();
+                String host = data.getHost();
+                String path = data.getPath();
+                String text = "Scheme: " + scheme + "\n" + "host: " + host + "\n" + "path: " + path;
+                Log.e("data啊噶是噶是大概", text);
+                String url = scheme + "://" + host + path;
+                EventBus.getDefault().post(new OutLinkEvent(url));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

@@ -6,7 +6,7 @@
               android:clickable="true"
               android:background="?attr/selectableItemBackground"
               android:gravity="center_vertical"
-              android:layout_height="45dp">
+              android:layout_height="50dp">
 
     <ImageView
         android:src="@mipmap/icon_fast"
