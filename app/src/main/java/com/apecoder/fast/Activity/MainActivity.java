@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -16,9 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -42,7 +38,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -242,31 +237,31 @@ public class MainActivity extends AppCompatActivity {
         }
         fragmentNum.setText(String.valueOf(fragmentDataList.size()));
     }
-
-    @Override
-    public boolean dispatchKeyEvent(@NonNull KeyEvent event) {
-        if (Build.VERSION.SDK_INT == 28) {
-            try {
-                ViewParent viewRootImpl = getWindow().getDecorView().getParent();
-                Class viewRootImplClass = viewRootImpl.getClass();
-
-                Field mAttachInfoField = viewRootImplClass.getDeclaredField("mAttachInfo");
-                mAttachInfoField.setAccessible(true);
-                Object mAttachInfo = mAttachInfoField.get(viewRootImpl);
-                Class mAttachInfoClass = mAttachInfo.getClass();
-
-                Field mHasWindowFocusField = mAttachInfoClass.getDeclaredField("mHasWindowFocus");
-                mHasWindowFocusField.setAccessible(true);
-                mHasWindowFocusField.set(mAttachInfo, true);
-                boolean mHasWindowFocus = (boolean) mHasWindowFocusField.get(mAttachInfo);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return super.dispatchKeyEvent(event);
-    }
+//
+//    @Override
+//    public boolean dispatchKeyEvent(@NonNull KeyEvent event) {
+//        if (Build.VERSION.SDK_INT == 28) {
+//            try {
+//                ViewParent viewRootImpl = getWindow().getDecorView().getParent();
+//                Class viewRootImplClass = viewRootImpl.getClass();
+//
+//                Field mAttachInfoField = viewRootImplClass.getDeclaredField("mAttachInfo");
+//                mAttachInfoField.setAccessible(true);
+//                Object mAttachInfo = mAttachInfoField.get(viewRootImpl);
+//                Class mAttachInfoClass = mAttachInfo.getClass();
+//
+//                Field mHasWindowFocusField = mAttachInfoClass.getDeclaredField("mHasWindowFocus");
+//                mHasWindowFocusField.setAccessible(true);
+//                mHasWindowFocusField.set(mAttachInfo, true);
+//                boolean mHasWindowFocus = (boolean) mHasWindowFocusField.get(mAttachInfo);
+//
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        return super.dispatchKeyEvent(event);
+//    }
 
 
     @Override

@@ -44,7 +44,7 @@
                 android:paddingRight="10dp"
                 android:textColor="@color/white"
                 android:singleLine="true"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 />
             <TextView
                 android:visibility="gone"
@@ -59,7 +59,7 @@
                 android:paddingRight="10dp"
                 android:textColor="@color/white"
                 android:singleLine="true"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 />
 
             <ImageView
@@ -71,4 +71,9 @@
         </LinearLayout>
 
     </android.support.v7.widget.Toolbar>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/waitList"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </LinearLayout>
