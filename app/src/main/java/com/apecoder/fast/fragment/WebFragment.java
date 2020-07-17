@@ -143,6 +143,10 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
                 .ready();
         mAgentWeb = mPreAgentWeb.get();
         waitList.setLayoutManager(new StaggeredGridLayoutManager(1,StaggeredGridLayoutManager.VERTICAL));
+        if(!TextUtils.isEmpty(mParam1)){
+            clearEdittext.setText(mParam1);
+            goLoadWeb();
+        }
         return view;
     }
 
@@ -174,7 +178,12 @@ public class WebFragment extends Fragment implements FragmentBackHandler {
         }
         currentUrl = clearEdittext.getText().toString();
         if (!AppValidationMgr.isURL(currentUrl)) {
-            currentUrl = BaseUrl.BASE_BAIDU_SEARCH_URL + clearEdittext.getText().toString();
+            if(currentUrl.startsWith("https://")){
+                //是网址
+
+            }else {
+                currentUrl = BaseUrl.BASE_BAIDU_SEARCH_URL + clearEdittext.getText().toString();
+            }
             Log.e("不是网址>>>>", currentUrl);
         } else {
             if (currentUrl.contains("http://") || currentUrl.contains("https://")) {

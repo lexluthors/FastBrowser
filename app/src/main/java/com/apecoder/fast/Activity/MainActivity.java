@@ -85,8 +85,9 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
 
+        getDataFromBrowser(getIntent());
         transaction = getSupportFragmentManager().beginTransaction();
-        WebFragment webFragment = WebFragment.newInstance("主页", "");
+        WebFragment webFragment = WebFragment.newInstance("", "");
         currentFlag = webFragment.getArguments().getString(ARG_PARAM3);
         transaction.add(R.id.container, webFragment);
         transaction.commitAllowingStateLoss();
@@ -150,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
     FragmentListAdapter adapter;
     DiyDialog dialog;
 
-    private void addFragment() {
+    private void addFragment(boolean isShowDialog) {
         adapter = new FragmentListAdapter(fragmentDataList);
         View view = getLayoutInflater().inflate(R.layout.dialog_list, null);
         recyclerView = view.findViewById(R.id.recyclerview);
@@ -166,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
                 hideFragment();
                 dialog.dismiss();
                 FragmentData fragmentData = new FragmentData();
-                WebFragment webFragment = WebFragment.newInstance("主页", "");
+                WebFragment webFragment = WebFragment.newInstance("", "");
                 fragmentData.setTitle("主页");
                 fragmentData.setFragment(webFragment);
                 fragmentData.setIcon(bitmap);
@@ -180,7 +181,9 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        dialog.show();
+        if(isShowDialog){
+            dialog.show();
+        }
 
         adapter.setOnItemClickListener((adapter, view1, position) -> {
             dialog.dismiss();
@@ -221,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
                     dialog.cancel();
                     transaction = getSupportFragmentManager().beginTransaction();
                     FragmentData fragmentData = new FragmentData();
-                    WebFragment webFragment = WebFragment.newInstance("主页", "");
+                    WebFragment webFragment = WebFragment.newInstance("", "");
                     fragmentData.setTitle("主页");
                     fragmentData.setFragment(webFragment);
                     fragmentData.setIcon(bitmap);
@@ -289,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showDialog() {
         if (dialog == null) {
-            addFragment();
+            addFragment(true);
         } else {
             dialog.show();
         }
@@ -361,6 +364,23 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("data啊噶是噶是大概", text);
                 String url = scheme + "://" + host + path;
                 EventBus.getDefault().post(new OutLinkEvent(url));
+
+                addFragment(false);
+                transaction = getSupportFragmentManager().beginTransaction();
+                hideFragment();
+                dialog.dismiss();
+                FragmentData fragmentData = new FragmentData();
+                WebFragment webFragment = WebFragment.newInstance(url, "");
+                fragmentData.setTitle("主页");
+                fragmentData.setFragment(webFragment);
+                fragmentData.setIcon(bitmap);
+                fragmentDataList.add(fragmentData);
+                adapter.notifyDataSetChanged();
+                transaction.add(R.id.container, webFragment);
+                transaction.show(webFragment);
+                transaction.commit();
+                fragmentNum.setText(String.valueOf(fragmentDataList.size()));
+                currentFlag = webFragment.getArguments().getString(ARG_PARAM3);
             } catch (Exception e) {
                 e.printStackTrace();
             }
